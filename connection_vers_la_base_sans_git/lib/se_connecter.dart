@@ -1,5 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:connection_vers_la_base/constante.dart';
+import 'package:connection_vers_la_base/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,7 +29,7 @@ class _SignUpScreenState extends State<SignUpScreen> with SingleTickerProviderSt
   void login(String email, name, password, passwordConfirmationController) async{
     try{
       Response response = await post(
-        Uri.parse('http://10.42.0.39:8000/api/register'),
+        Uri.parse('$baseUrl/register'),
         body: {
           'name': name,
           'email' : email,
@@ -34,6 +37,7 @@ class _SignUpScreenState extends State<SignUpScreen> with SingleTickerProviderSt
           'password_confirmation': passwordConfirmationController
         }
       );
+
       if(response.statusCode == 200){
         var data = jsonDecode(response.body.toString());
         print("Voici le token :" + data['token']);
@@ -58,6 +62,10 @@ class _SignUpScreenState extends State<SignUpScreen> with SingleTickerProviderSt
         print('failed');
       }
     }catch(e){
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Erreur : Connection vers la base échoué !"),
+      ));
+
       print(e.toString());
     }
   }
@@ -138,6 +146,37 @@ class _SignUpScreenState extends State<SignUpScreen> with SingleTickerProviderSt
               ),
             ),
             SizedBox(height: 40,),
+            /*OverflowBox(
+              minHeight: 0.0,
+              minWidth: 0.0,
+              maxWidth: double.infinity,
+              maxHeight: double.infinity,
+            ),*/
+            TextButton(
+              onPressed: (){
+                login(emailController.text.toString(), nameController.text.toString(), passwordController.text.toString(), passwordConfirmationController.text.toString());
+              },
+              style: ButtonStyle(
+                  backgroundColor: MaterialStateColor.resolveWith((states) => Colors.brown),
+                  padding: MaterialStateProperty.resolveWith((states) => EdgeInsets.symmetric(vertical:20)),
+              ),
+              child: const Center(
+                child: Text(
+                  "Créer mon compte",
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+            ),
+            /*Container(
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.brown,
+                borderRadius: BorderRadius.circular(30)
+              ),
+              child: Center(
+                child: Text("Créer mon compte"),
+              ),
+            ),
             GestureDetector(
               onTap: (){
                 login(emailController.text.toString(), nameController.text.toString(), passwordController.text.toString(), passwordConfirmationController.text.toString());
@@ -146,13 +185,13 @@ class _SignUpScreenState extends State<SignUpScreen> with SingleTickerProviderSt
                 height: 40,
                 decoration: BoxDecoration(
                   color: Colors.brown,
-                  borderRadius: BorderRadius.circular(10)
+                  borderRadius: BorderRadius.circular(20)
                 ),
                 child: const Center(
                   child: Text("Créer mon compte"),
                 ),
               ),
-            ),
+            ),*/
             SizedBox(height: 10,),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

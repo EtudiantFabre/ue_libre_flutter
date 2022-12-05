@@ -1,8 +1,16 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:connection_vers_la_base/constante.dart';
 import 'package:connection_vers_la_base/home.dart';
+import 'package:connection_vers_la_base/models/groupe.dart';
+import 'package:connection_vers_la_base/se_connecter.dart';
+import 'package:connection_vers_la_base/services/groupe_service.dart';
+import 'package:connection_vers_la_base/services/user_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -16,27 +24,51 @@ class _LoginState extends State<Login> {
   TextEditingController passwordController = TextEditingController();
 
   void login(String email, password) async{
+    reloadPref();
+    //var token = getUserToken();
     try{
       Response response = await post(
-          Uri.parse('http://10.42.0.39:8000/api/login'),
+          Uri.parse('$baseUrl/login'),
           body: {
             'email' : email,
             'password': password,
           }
       );
+
+
+
       if(response.statusCode == 200){
         var data = jsonDecode(response.body.toString());
-        print("Voici le token :" + data['token']);
+        var token = data['token'];
+        print("${"Voici le token :" + data['token']} | Token récuperé :${getToken()}");
         print(data['user']['id']);
 
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text("Vous êtes connecter avec succès !"),
         ));
 
+        //print(fetchGroupe());
+
         SharedPreferences pref = await SharedPreferences.getInstance();
+        //await client.revokeUserToken("user-id", data);
+        print( await "Voici le preferences : " + getToken().toString());
         await pref.setString('token', data['token'] ?? '');
         await pref.setInt('userId', data['user']['id'] ?? 0);
 
+        /*Future<Response> responsegpe = get(
+            Uri.parse('$groupesURL'),
+            headers: {
+              HttpHeaders.authorizationHeader : '$token',
+            }
+        );
+
+        print("response : " + responsegpe.toString());
+        if(responsegpe.toString() != ""){
+          var dataresponse = jsonDecode(responsegpe.toString());
+          print("Voici la liste des groupes :" + dataresponse);
+        }*/
+
+        //  Changer de page :
         Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>Home()), (route) => false);
 
         /*print("Voici le token :" + data['token']);
@@ -119,10 +151,23 @@ class _LoginState extends State<Login> {
                           (states) => EdgeInsets.symmetric(
                             vertical: 15,
                             horizontal: 40,
-                          )
+                          ),
                   )
               ),
             ),
+            SizedBox(height: 10,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Je n'est pas de compte. "),
+                GestureDetector(
+                  child: Text("Créer !", style: TextStyle(color: Colors.blue)),
+                  onTap: (){
+                    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>SignUpScreen()), (route) => false);
+                  },
+                )
+              ],
+            )
           ],
         ),
       ),

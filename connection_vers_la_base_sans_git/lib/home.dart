@@ -1,4 +1,9 @@
 import 'package:connection_vers_la_base/login.dart';
+import 'package:connection_vers_la_base/services/groupe_service.dart';
+import 'package:connection_vers_la_base/widgets/category_selector.dart';
+import 'package:connection_vers_la_base/widgets/favorite_contact.dart';
+import 'package:connection_vers_la_base/widgets/recent_groupe.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,23 +18,29 @@ class _HomeState extends State<Home> {
 
   Future<bool> logout() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
+    await pref.reload();
     return await pref.remove('token');
+  }
+
+  @override
+  void initState() {
+    fetchGroupe();
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.menu),
+          icon: Icon(Icons.search),
           iconSize: 30.0,
           color: Colors.white,
-          onPressed: (){
-
-          },
+          onPressed: (){},
         ),
-        title: Text(
-          "HOME",
+        title: const Text(
+          "Chats",
           style: TextStyle(
             fontSize: 28.0,
             fontWeight: FontWeight.bold,
@@ -49,7 +60,7 @@ class _HomeState extends State<Home> {
           ),
         ],
       ),
-      body: Padding(
+      /*body: Padding(
         padding: EdgeInsets.all(10.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -65,6 +76,29 @@ class _HomeState extends State<Home> {
             ),
           ],
         ),
+      ),*/
+      body: Column(
+        children: <Widget>[
+          CategorySelector(),
+          Expanded(
+            child: Container(
+              height: 500.0,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(30.0),
+                  topRight: Radius.circular(30.0),
+                ),
+              ),
+              child: Column(
+                children: <Widget>[
+                  FavoriteContact(),
+                  RecentGroupe(),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
       // body
 
